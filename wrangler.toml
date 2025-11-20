@@ -1,20 +1,14 @@
-<<<<<<< HEAD
 name = "seowebsite"
 main = "worker.js"
 compatibility_date = "2025-11-20"
 type = "javascript" # 明确指定Worker类型为JavaScript
 
-<<<<<<< HEAD
-# 移除[[kv_namespaces]]部分，因为[site]会自动处理ASSETS绑定
-# [[kv_namespaces]] 
-# binding = "ASSETS"
-# id = "YOUR_KV_NAMESPACE_ID" 
 =======
 # KV 绑定，用于存储静态文件
 [[kv_namespaces]] # 使用双括号表示数组元素
 binding = "__seowebsite-workers_sites_assets"
 id = "add5f11ee2624cc09767505a27262632" # *** 在这里填入您的实际 KV Namespace ID ***
->>>>>>> 8fd5b354366a574bfe84b7530ecf961f0863f22b
+
 
 # 静态资产配置
 [build]
@@ -35,7 +29,7 @@ main = "worker.js"
 compatibility_date = "2025-11-20"
 type = "javascript" # 明确指定Worker类型为JavaScript
 
-<<<<<<< HEAD
+
 # 移除[[kv_namespaces]]部分，因为[site]会自动处理ASSETS绑定
 # [[kv_namespaces]] 
 # binding = "ASSETS"
@@ -45,7 +39,7 @@ type = "javascript" # 明确指定Worker类型为JavaScript
 [[kv_namespaces]] # 使用双括号表示数组元素
 binding = "__seowebsite-workers_sites_assets"
 id = "add5f11ee2624cc09767505a27262632" # *** 在这里填入您的实际 KV Namespace ID ***
->>>>>>> 8fd5b354366a574bfe84b7530ecf961f0863f22b
+
 
 # 静态资产配置
 [build]
@@ -60,4 +54,3 @@ bucket = "./public" # 指向静态文件所在的目录
 # SEMRUSH_API_KEY = "your_semrush_api_key"
 # MOZ_ACCESS_ID = "your_moz_access_id"
 # MOZ_SECRET_KEY = "your_moz_secret_key"
->>>>>>> bd30e7db8b6871227f7b814b1dc4721b321c4c16
