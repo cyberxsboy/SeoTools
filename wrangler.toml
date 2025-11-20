@@ -28,14 +28,3 @@ name = "seowebsite"
 main = "worker.js"
 compatibility_date = "2025-11-20"
 type = "javascript" # 明确指定Worker类型为JavaScript
-
-
-# 移除[[kv_namespaces]]部分，因为[site]会自动处理ASSETS绑定
-# [[kv_namespaces]] 
-# binding = "ASSETS"
-# id = "YOUR_KV_NAMESPACE_ID" 
-
-# KV 绑定，用于存储静态文件
-[[kv_namespaces]] # 使用双括号表示数组元素
-binding = "__seowebsite-workers_sites_assets"
-id = "add5f11ee2624cc09767505a27262632" # *** 在这里填入您的实际 KV Namespace ID ***
