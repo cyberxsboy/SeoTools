@@ -1,7 +1,10 @@
-const axios = require('axios');
+const axios = require('axios'); // 在Worker中，axios通常通过import获取
 
+// 更改为接受env对象
 async function getAhrefsRankings(domain, keyword, ahrefsApiKey) {
-    if (!ahrefsApiKey) {
+    const AHREFS_API_KEY = ahrefsApiKey; // 直接使用传入的key
+
+    if (!AHREFS_API_KEY) {
         console.warn('Ahrefs API Key is not provided, returning simulated data.');
         return [{
             keyword: keyword,
@@ -13,22 +16,17 @@ async function getAhrefsRankings(domain, keyword, ahrefsApiKey) {
 
     try {
         // *** 在这里集成真实的Ahrefs API调用逻辑 ***
-        // 请访问Ahrefs API文档获取正确的API端点和参数：
-        // 例如：https://ahrefs.com/api/v2
-        // 假设使用 Ahrefs Site Explorer -> Organic Keywords API
-        // 实际API端点和参数会根据您的具体需求和Ahrefs版本有所不同
         /*
         const ahrefsApiUrl = `https://api.ahrefs.com/v2/site-explorer/organic-keywords`;
         const ahrefsResponse = await axios.get(ahrefsApiUrl, {
             headers: {
                 'Accept': 'application/json',
-                'Authorization': `Bearer ${ahrefsApiKey}` // 使用传入的key
+                'Authorization': `Bearer ${AHREFS_API_KEY}`
             },
             params: {
                 target: domain,
                 output: 'json',
                 limit: 10, 
-                // keyword: keyword 
             }
         });
 
@@ -41,7 +39,6 @@ async function getAhrefsRankings(domain, keyword, ahrefsApiKey) {
         return realRankings;
         */
 
-        // 暂时保留模拟数据，直到真实API集成
         return [{
             keyword: keyword,
             searchEngine: 'Google (Ahrefs)',
@@ -61,4 +58,4 @@ async function getAhrefsRankings(domain, keyword, ahrefsApiKey) {
     }
 }
 
-module.exports = { getAhrefsRankings };
+export { getAhrefsRankings }; // 更改为ES Modules导出

@@ -1,7 +1,10 @@
-const axios = require('axios');
+const axios = require('axios'); // 在Worker中，axios通常通过import获取
 
+// 更改为接受env对象
 async function getSemrushRankings(domain, keyword, semrushApiKey) {
-    if (!semrushApiKey) {
+    const SEMRUSH_API_KEY = semrushApiKey; // 直接使用传入的key
+
+    if (!SEMRUSH_API_KEY) {
         console.warn('SEMrush API Key is not provided, returning simulated data.');
         return [{
             keyword: keyword,
@@ -13,15 +16,11 @@ async function getSemrushRankings(domain, keyword, semrushApiKey) {
 
     try {
         // *** 在这里集成真实的SEMrush API调用逻辑 ***
-        // 请访问SEMrush API文档获取正确的API端点和参数：
-        // 例如：https://developer.semrush.com/api/v3/
-        // 假设使用 SEMrush Keyword Magic Tool API 或 Organic Research API
-        // 实际API端点和参数会根据您的具体需求和SEMrush版本有所不同
         /*
         const semrushApiUrl = `https://api.semrush.com/analytics/v1/sitedomain/organic`;
         const semrushResponse = await axios.get(semrushApiUrl, {
             params: {
-                key: semrushApiKey, // 使用传入的key
+                key: SEMRUSH_API_KEY, 
                 domain: domain,
                 export_columns: 'Ph,Po,Ur', 
                 phrase: keyword, 
@@ -41,7 +40,6 @@ async function getSemrushRankings(domain, keyword, semrushApiKey) {
         return realRankings;
         */
 
-        // 暂时保留模拟数据，直到真实API集成
         return [{
             keyword: keyword,
             searchEngine: 'Google (SEMrush)',
@@ -61,4 +59,4 @@ async function getSemrushRankings(domain, keyword, semrushApiKey) {
     }
 }
 
-module.exports = { getSemrushRankings };
+export { getSemrushRankings }; // 更改为ES Modules导出
