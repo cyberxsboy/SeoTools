@@ -1,7 +1,20 @@
 import { getAhrefsRankings } from './api/ahrefs';
 import { getSemrushRankings } from './api/semrush';
 import { getMozMetrics } from './api/moz';
-import { getAssetFromKV } from '@cloudflare/kv-asset-handler';
+
+function getMimeType(filePath) {
+  if (filePath.endsWith('.html')) return 'text/html';
+  if (filePath.endsWith('.css')) return 'text/css';
+  if (filePath.endsWith('.js')) return 'application/javascript';
+  if (filePath.endsWith('.json')) return 'application/json';
+  if (filePath.endsWith('.png')) return 'image/png';
+  if (filePath.endsWith('.jpg') || filePath.endsWith('.jpeg')) return 'image/jpeg';
+  if (filePath.endsWith('.gif')) return 'image/gif';
+  if (filePath.endsWith('.svg')) return 'image/svg+xml';
+  if (filePath.endsWith('.ico')) return 'image/x-icon';
+  // Add more as needed
+  return 'application/octet-stream'; // Default
+}
 
 export default {
   async fetch(request, env, ctx) {
@@ -20,16 +33,44 @@ export default {
     const url = new URL(request.url);
     console.log(`Incoming request for: ${url.pathname}`);
 
-    if (url.pathname === '/' || url.pathname.endsWith('.html') || url.pathname.endsWith('.css') || url.pathname.endsWith('.js')) {
-      console.log('Attempting to serve static asset using getAssetFromKV with manifest.');
+    // Logic to serve static assets directly from KV
+    let filePath = url.pathname;
+    if (filePath.startsWith('/')) {
+      filePath = filePath.substring(1); // Remove leading slash
+    }
+
+    // If the path is empty or refers to root, serve index.html
+    if (filePath === '' || filePath === 'index.html') {
+      filePath = 'public/index.html';
+    } else if (!filePath.startsWith('public/')) {
+      // Prefix other static assets with 'public/' if not already prefixed
+      filePath = 'public/' + filePath;
+    }
+
+    // Check if it's a request for a known static asset type
+    const isStaticAsset = filePath.endsWith('.html') || filePath.endsWith('.css') || filePath.endsWith('.js') ||
+                          filePath.endsWith('.png') || filePath.endsWith('.jpg') || filePath.endsWith('.jpeg') ||
+                          filePath.endsWith('.gif') || filePath.endsWith('.svg') || filePath.endsWith('.ico') ||
+                          filePath.endsWith('.json'); // Added common static file types
+
+    if (isStaticAsset) {
+      console.log(`Attempting to serve static asset directly from KV: ${filePath}`);
       try {
-        return await getAssetFromKV(request, {
-          ASSET_NAMESPACE: env.__STATIC_CONTENT,
-          ASSET_MANIFEST: __STATIC_CONTENT_MANIFEST,
+        const asset = await env.__STATIC_CONTENT.get(filePath, { type: "arrayBuffer" });
+        if (asset === null) {
+          console.error(`Asset not found in KV for path: ${filePath}`);
+          return new Response('Asset not found', { status: 404 });
+        }
+
+        const mimeType = getMimeType(filePath);
+        return new Response(asset, {
+          headers: {
+            'Content-Type': mimeType,
+            'Cache-Control': 'public, max-age=3600', // Cache static assets for 1 hour
+          },
         });
       } catch (e) {
-        console.error(`Error serving static asset ${url.pathname}:`, e);
-        console.error('Full error object:', JSON.stringify(e, Object.getOwnPropertyNames(e)));
+        console.error(`Error serving static asset ${filePath} directly from KV:`, e);
         return new Response(`Error serving static asset: ${e.message || 'Unknown error'}`, { status: 500 });
       }
     }
