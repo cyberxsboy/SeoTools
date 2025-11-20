@@ -6,7 +6,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "npx wrangler dev",
     "deploy": "npx wrangler deploy",
-    "build": "npx wrangler deploy --dry-run --outdir=dist"
+    "build": ""
   },
   "keywords": [],
   "author": "",
