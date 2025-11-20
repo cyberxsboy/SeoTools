@@ -18,7 +18,9 @@ export default {
         });
       } catch (e) {
         console.error(`Error serving static asset ${url.pathname}:`, e); 
-        return new Response(`Error serving static asset: ${e.message}`, { status: 500 });
+        // 打印完整的错误对象，以便更详细的诊断
+        console.error('Full error object:', JSON.stringify(e, Object.getOwnPropertyNames(e))); 
+        return new Response(`Error serving static asset: ${e.message || 'Unknown error'}`, { status: 500 });
       }
     }
 

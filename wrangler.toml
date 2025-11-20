@@ -7,7 +7,7 @@ compatibility_date = "2025-11-20"
 
 [[kv_namespaces]] # 使用双括号表示数组元素
 binding = "ASSETS"
-id = "YOUR_KV_NAMESPACE_ID" # *** 在这里填入您的实际 KV Namespace ID ***
+id = "a01b6f73dd624dafb838b2f033dc47f8" # *** 在这里填入您的实际 KV Namespace ID ***
 
 # 如果需要环境变量，可以在此处配置
 [vars]
