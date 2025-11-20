@@ -1,14 +1,18 @@
 import { getAhrefsRankings } from './api/ahrefs';
 import { getSemrushRankings } from './api/semrush';
 import { getMozMetrics } from './api/moz';
-// import { getAssetFromKV } from '@cloudflare/kv-asset-handler'; // 暂时不使用getAssetFromKV
+import { getAssetFromKV } from '@cloudflare/kv-asset-handler'; // 重新导入getAssetFromKV
+
+// __STATIC_CONTENT_MANIFEST 是由 Wrangler 在构建时注入的全局变量，它包含了静态资产的映射。
+// 在纯JavaScript环境中，我们直接访问它即可。
+// 如果仍然遇到错误，可能需要检查Wrangler版本或构建步骤。
 
 export default {
   async fetch(request, env, ctx) {
     // --- 调试日志：检查请求对象 --- Start
     console.log('--- Incoming Request Debug ---');
     console.log('Request method:', request.method);
-    console.log('Request URL:', request.url); // 直接打印 request.url
+    console.log('Request URL:', request.url); 
     try {
       const parsedUrl = new URL(request.url);
       console.log('Parsed URL pathname:', parsedUrl.pathname);
@@ -24,34 +28,14 @@ export default {
 
     // 静态文件服务
     if (url.pathname === '/' || url.pathname.endsWith('.html') || url.pathname.endsWith('.css') || url.pathname.endsWith('.js')) {
-      console.log('Attempting to serve static asset directly from KV.'); 
-      // 修正filePath的构建方式，移除硬编码的'public/'前缀
-      const filePath = url.pathname === '/' ? 'index.html' : url.pathname.substring(1); // 移除/public前缀
-      console.log(`Resolved KV file path: ${filePath}`);
-
+      console.log('Attempting to serve static asset using getAssetFromKV with manifest.'); 
       try {
-        const asset = await env.ASSETS.get(filePath); // 直接从KV中获取文件内容
-        if (asset === null) {
-          console.error(`Asset not found in KV for path: ${filePath}`);
-          return new Response('Asset not found', { status: 404 });
-        }
-
-        let contentType = 'text/plain';
-        if (filePath.endsWith('.html')) {
-          contentType = 'text/html';
-        } else if (filePath.endsWith('.css')) {
-          contentType = 'text/css';
-        } else if (filePath.endsWith('.js')) {
-          contentType = 'application/javascript';
-        }
-
-        return new Response(asset, {
-          headers: {
-            'Content-Type': contentType,
-          },
+        return await getAssetFromKV(request, {
+          ASSET_NAMESPACE: env.ASSETS,
+          ASSET_MANIFEST: __STATIC_CONTENT_MANIFEST, // 重新使用注入的清单
         });
       } catch (e) {
-        console.error(`Error serving static asset ${url.pathname} directly from KV:`, e); 
+        console.error(`Error serving static asset ${url.pathname}:`, e); 
         console.error('Full error object:', JSON.stringify(e, Object.getOwnPropertyNames(e))); 
         return new Response(`Error serving static asset: ${e.message || 'Unknown error'}`, { status: 500 });
       }
