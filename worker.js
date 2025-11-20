@@ -3,8 +3,6 @@ import { getSemrushRankings } from './api/semrush';
 import { getMozMetrics } from './api/moz';
 import { getAssetFromKV } from '@cloudflare/kv-asset-handler';
 
-// declare const __STATIC_CONTENT_MANIFEST: string; // 声明全局变量 - 此行是TypeScript语法，在JS环境中会报错，移除
-
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
@@ -16,7 +14,7 @@ export default {
       try {
         return await getAssetFromKV(request, {
           ASSET_NAMESPACE: env.ASSETS, 
-          ASSET_MANIFEST: (globalThis as any).__STATIC_CONTENT_MANIFEST, // 直接访问全局变量
+          ASSET_MANIFEST: __STATIC_CONTENT_MANIFEST, // 直接访问全局变量
         });
       } catch (e) {
         console.error(`Error serving static asset ${url.pathname}:`, e); 
