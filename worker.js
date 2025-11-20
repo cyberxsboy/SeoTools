@@ -1,7 +1,7 @@
 import { getAhrefsRankings } from './api/ahrefs';
 import { getSemrushRankings } from './api/semrush';
 import { getMozMetrics } from './api/moz';
-import { getAssetFromKV } from '@cloudflare/kv-asset-handler';
+// import { getAssetFromKV } from '@cloudflare/kv-asset-handler'; // 暂时不使用getAssetFromKV
 
 export default {
   async fetch(request, env, ctx) {
@@ -23,18 +23,34 @@ export default {
     console.log(`Incoming request for: ${url.pathname}`); 
 
     // 静态文件服务
-    // 当请求路径匹配静态文件时，使用getAssetFromKV来服务
     if (url.pathname === '/' || url.pathname.endsWith('.html') || url.pathname.endsWith('.css') || url.pathname.endsWith('.js')) {
-      console.log('Attempting to serve static asset using getAssetFromKV.'); 
+      console.log('Attempting to serve static asset directly from KV.'); 
+      const filePath = url.pathname === '/' ? 'public/index.html' : `public${url.pathname}`;
+      console.log(`Resolved KV file path: ${filePath}`);
+
       try {
-        // 简化getAssetFromKV调用，只传入request和ASSET_NAMESPACE
-        return await getAssetFromKV(request, {
-          ASSET_NAMESPACE: env.ASSETS,
-          // 移除ASSET_MANIFEST，让getAssetFromKV自动查找
+        const asset = await env.ASSETS.get(filePath); // 直接从KV中获取文件内容
+        if (asset === null) {
+          console.error(`Asset not found in KV: ${filePath}`);
+          return new Response('Asset not found', { status: 404 });
+        }
+
+        let contentType = 'text/plain';
+        if (filePath.endsWith('.html')) {
+          contentType = 'text/html';
+        } else if (filePath.endsWith('.css')) {
+          contentType = 'text/css';
+        } else if (filePath.endsWith('.js')) {
+          contentType = 'application/javascript';
+        }
+
+        return new Response(asset, {
+          headers: {
+            'Content-Type': contentType,
+          },
         });
       } catch (e) {
-        console.error(`Error serving static asset ${url.pathname}:`, e); 
-        // 打印完整的错误对象，以便更详细的诊断
+        console.error(`Error serving static asset ${url.pathname} directly from KV:`, e); 
         console.error('Full error object:', JSON.stringify(e, Object.getOwnPropertyNames(e))); 
         return new Response(`Error serving static asset: ${e.message || 'Unknown error'}`, { status: 500 });
       }
