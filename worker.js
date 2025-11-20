@@ -12,7 +12,6 @@ function getMimeType(filePath) {
   if (filePath.endsWith('.gif')) return 'image/gif';
   if (filePath.endsWith('.svg')) return 'image/svg+xml';
   if (filePath.endsWith('.ico')) return 'image/x-icon';
-  // Add more as needed
   return 'application/octet-stream'; // Default
 }
 
