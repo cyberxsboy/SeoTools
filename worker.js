@@ -1,19 +1,10 @@
+import { getAssetFromKV } from '@cloudflare/kv-asset-handler';
 import { getAhrefsRankings } from './api/ahrefs';
 import { getSemrushRankings } from './api/semrush';
 import { getMozMetrics } from './api/moz';
 
-function getMimeType(filePath) {
-  if (filePath.endsWith('.html')) return 'text/html';
-  if (filePath.endsWith('.css')) return 'text/css';
-  if (filePath.endsWith('.js')) return 'application/javascript';
-  if (filePath.endsWith('.json')) return 'application/json';
-  if (filePath.endsWith('.png')) return 'image/png';
-  if (filePath.endsWith('.jpg') || filePath.endsWith('.jpeg')) return 'image/jpeg';
-  if (filePath.endsWith('.gif')) return 'image/gif';
-  if (filePath.endsWith('.svg')) return 'image/svg+xml';
-  if (filePath.endsWith('.ico')) return 'image/x-icon';
-  return 'application/octet-stream'; // Default
-}
+// globalThis.__STATIC_CONTENT_MANIFEST will be automatically injected by Wrangler
+// when using Workers Sites (with [site] in wrangler.toml)
 
 export default {
   async fetch(request, env, ctx) {
@@ -32,47 +23,46 @@ export default {
     const url = new URL(request.url);
     console.log(`Incoming request for: ${url.pathname}`);
 
-    // Logic to serve static assets directly from KV
-    let filePath = url.pathname;
-    if (filePath.startsWith('/')) {
-      filePath = filePath.substring(1); // Remove leading slash
-    }
+    // Attempt to serve static assets first using kv-asset-handler
+    if (url.pathname.startsWith('/api/')) {
+        // This is an API route, skip asset handling and go to API logic
+    } else {
+        try {
+            // Check if it's the root path or a path that should serve index.html
+            if (url.pathname === '/' || url.pathname.endsWith('.html')) {
+                return await getAssetFromKV(
+                    {
+                        request,
+                        waitUntil(promise) {
+                            return ctx.waitUntil(promise);
+                        },
+                    },
+                    {
+                        ASSET_NAMESPACE: env.__STATIC_CONTENT,
+                        ASSET_MANIFEST: globalThis.__STATIC_CONTENT_MANIFEST,
+                    }
+                );
+            }
 
-    // If the path is empty or refers to root, serve index.html
-    if (filePath === '' || filePath === 'index.html') {
-      filePath = 'public/index.html';
-    } else if (!filePath.startsWith('public/')) {
-      // Prefix other static assets with 'public/' if not already prefixed
-      filePath = 'public/' + filePath;
-    }
-
-    // Check if it's a request for a known static asset type
-    const isStaticAsset = filePath.endsWith('.html') || filePath.endsWith('.css') || filePath.endsWith('.js') ||
-                          filePath.endsWith('.png') || filePath.endsWith('.jpg') || filePath.endsWith('.jpeg') ||
-                          filePath.endsWith('.gif') || filePath.endsWith('.svg') || filePath.endsWith('.ico') ||
-                          filePath.endsWith('.json'); // Added common static file types
-
-    if (isStaticAsset) {
-      console.log(`Attempting to serve static asset directly from KV: ${filePath}`);
-      try {
-        const asset = await env.__STATIC_CONTENT.get(filePath, { type: "arrayBuffer" });
-        if (asset === null) {
-          console.error(`Asset not found in KV for path: ${filePath}`);
-          return new Response('Asset not found', { status: 404 });
+            // For other static assets (CSS, JS, images, etc.)
+            return await getAssetFromKV(
+                {
+                    request,
+                    waitUntil(promise) {
+                        return ctx.waitUntil(promise);
+                    },
+                },
+                {
+                    ASSET_NAMESPACE: env.__STATIC_CONTENT,
+                    ASSET_MANIFEST: globalThis.__STATIC_CONTENT_MANIFEST,
+                }
+            );
+        } catch (e) {
+            console.error('Error serving static asset with kv-asset-handler:', e);
+            // If it's not a static asset or not found, fall through to API handling or 404
         }
-
-        const mimeType = getMimeType(filePath);
-        return new Response(asset, {
-          headers: {
-            'Content-Type': mimeType,
-            'Cache-Control': 'public, max-age=3600', // Cache static assets for 1 hour
-          },
-        });
-      } catch (e) {
-        console.error(`Error serving static asset ${filePath} directly from KV:`, e);
-        return new Response(`Error serving static asset: ${e.message || 'Unknown error'}`, { status: 500 });
-      }
     }
+
 
     if (url.pathname === '/fetch-website-content') {
       console.log('Handling /fetch-website-content API call.');
