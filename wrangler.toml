@@ -7,4 +7,4 @@ command = "npm run build"
 
 [[kv_namespaces]]
 binding = "__STATIC_CONTENT"
-id = "__seowebsite-workers_sites_assets"
+id = "1a8a89365d0c4f7b876e4ab332fd51c1"
