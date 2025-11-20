@@ -32,7 +32,7 @@ export default {
       try {
         return await getAssetFromKV(request, {
           ASSET_NAMESPACE: env.ASSETS,
-          ASSET_MANIFEST: __STATIC_CONTENT_MANIFEST, // 重新使用注入的清单
+          ASSET_MANIFEST: __seowebsite-workers_sites_assets, // 重新使用注入的清单
         });
       } catch (e) {
         console.error(`Error serving static asset ${url.pathname}:`, e); 
@@ -121,3 +121,4 @@ export default {
     return new Response('Not Found', { status: 404 });
   },
 };
+
