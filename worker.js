@@ -42,6 +42,10 @@ export default {
       } catch (e) {
         // If the asset is not found, log the error and continue to API handling
         console.error('Error serving static asset with kv-asset-handler:', e);
+        console.error('Asset handling error details:');
+        console.error('Error name:', e.name);
+        console.error('Error message:', e.message);
+        console.error('Error stack:', e.stack);
         // Depending on the type of error (e.g., NotFoundError from kv-asset-handler),
         // you might want to handle it more specifically.
         // For now, if getAssetFromKV fails for a non-API path, we assume it's not a static asset
