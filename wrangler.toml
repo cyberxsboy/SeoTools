@@ -1,8 +1,9 @@
-name = "seowebsite"
-main = "worker.js"
-compatibility_date = "2025-11-20"
-type = "javascript" # 明确指定Worker类型为JavaScript
+    name = "seowebsite"
+    main = "worker.js"
+    compatibility_date = "2025-11-20"
+    type = "javascript"
 
+<<<<<<< HEAD
 # KV 绑定，用于存储静态文件
 [[kv_namespaces]] # 使用双括号表示数组元素
 binding = "ASSETS"
@@ -27,3 +28,21 @@ bucket = "./public" # 指向静态文件所在的目录
 # SEMRUSH_API_KEY = "your_semrush_api_key"
 # MOZ_ACCESS_ID = "your_moz_access_id"
 # MOZ_SECRET_KEY = "your_moz_secret_key"
+=======
+    [build]
+    command = "npm run build"
+
+    [site]
+    bucket = "./public"
+    # KV Namespace id: Wrangler will automatically bind a KV Namespace named "ASSETS"
+    # to this Worker when deploying a Workers Site.
+    # The ID for this KV Namespace should be automatically managed by Cloudflare.
+    # If you need to manually specify it, you can add:
+    # id = "YOUR_ACTUAL_KV_NAMESPACE_ID"
+
+    [vars]
+    # AHREFS_API_KEY = "your_ahrefs_api_key"
+    # SEMRUSH_API_KEY = "your_semrush_api_key"
+    # MOZ_ACCESS_ID = "your_moz_access_id"
+    # MOZ_SECRET_KEY = "your_moz_secret_key"
+>>>>>>> 33c4094e075b599e4ea6d62c50532fb7f6fa5c86
