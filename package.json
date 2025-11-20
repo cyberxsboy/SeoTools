@@ -4,8 +4,8 @@
   "main": "worker.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "wrangler dev",
-    "deploy": "wrangler deploy",
+    "dev": "npx wrangler dev",
+    "deploy": "npx wrangler deploy",
     "build": "# no build step needed for pure static assets for now"
   },
   "keywords": [],

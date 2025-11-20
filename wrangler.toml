@@ -3,10 +3,10 @@ main = "worker.js"
 compatibility_date = "2025-11-20"
 type = "javascript" # 明确指定Worker类型为JavaScript
 
-# KV 绑定，用于存储静态文件
-[[kv_namespaces]] # 使用双括号表示数组元素
-binding = "ASSETS"
-id = "YOUR_KV_NAMESPACE_ID" # *** 在这里填入您的实际 KV Namespace ID ***
+# 移除[[kv_namespaces]]部分，因为[site]会自动处理ASSETS绑定
+# [[kv_namespaces]] 
+# binding = "ASSETS"
+# id = "YOUR_KV_NAMESPACE_ID" 
 
 # 静态资产配置
 [build]
