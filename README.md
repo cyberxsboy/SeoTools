@@ -28,55 +28,79 @@ git clone https://github.com/cyberxsboy/SeoTools.git
 cd SeoTools
 ```
 
-### 2. 后端代理设置
+### 2. 安装依赖
 
-进入项目根目录，安装Node.js依赖：
+进入项目根目录，安装Node.js和Wrangler依赖：
 
 ```bash
 npm install
+npm install -g wrangler # 如果尚未安装
 ```
 
-启动后端代理服务器：
+### 3. API Key 配置 (wrangler.toml 或 Cloudflare 控制台)
+
+为了使关键词排名追踪和权威度指标功能正常工作，您需要在 `wrangler.toml` 文件中或通过 Cloudflare Worker 控制面板设置第三方SEO工具的API密钥。**请勿将敏感信息直接提交到Git仓库。**
+
+**通过 `wrangler.toml` 配置 (推荐用于本地开发和测试):**
+
+打开 `wrangler.toml` 文件，找到 `[vars]` 部分，并替换为您的真实API密钥：
+
+```toml
+[vars]
+AHREFS_API_KEY = "YOUR_AHREFS_API_KEY"
+SEMRUSH_API_KEY = "YOUR_SEMRUSH_API_KEY"
+MOZ_ACCESS_ID = "YOUR_MOZ_ACCESS_ID"
+MOZ_SECRET_KEY = "YOUR_MOZ_SECRET_KEY"
+```
+
+**通过 Cloudflare Worker 控制面板配置 (推荐用于生产环境):**
+
+登录到您的Cloudflare账户，导航到您的Worker项目，在“设置” -> “环境变量”中添加相应的环境变量。
+
+### 4. 真实 API 调用激活
+
+打开 `api/ahrefs.js`、`api/semrush.js` 和 `api/moz.js` 文件，取消注释并根据各个API的最新文档填入真实的API调用逻辑。
+
+### 5. 本地开发
+
+在项目根目录运行以下命令以在本地启动Worker：
 
 ```bash
-npm start
+npm run dev
 ```
 
-服务器将在 `http://localhost:3000` 运行。请保持此终端窗口打开。
+Worker 将在 `http://localhost:8787` (或 Wrangler 提示的其他端口) 运行。您可以在浏览器中访问此地址来测试前端和API。
 
-### 3. 前端应用
+### 6. 部署到 Cloudflare
 
-直接在浏览器中打开 `index.html` 文件即可。由于是纯前端应用，不需要额外的服务器。
+确保您已登录到 Wrangler CLI：
 
-## API Key 配置
-
-为了使关键词排名追踪和权威度指标功能正常工作，您需要在 `server.js` 文件中配置第三方SEO工具的API密钥。这些密钥应该在实际部署时通过环境变量或其他安全方式管理。
-
-打开 `server.js` 文件，找到以下占位符并替换为您的真实API密钥：
-
-```javascript
-const AHREFS_API_KEY = process.env.AHREFS_API_KEY || 'YOUR_AHREFS_API_KEY';
-const SEMRUSH_API_KEY = process.env.SEMRUSH_API_KEY || 'YOUR_SEMRUSH_API_KEY';
-const MOZ_ACCESS_ID = process.env.MOZ_ACCESS_ID || 'YOUR_MOZ_ACCESS_ID';
-const MOZ_SECRET_KEY = process.env.MOZ_SECRET_KEY || 'YOUR_MOZ_SECRET_KEY';
+```bash
+wrangler login
 ```
 
-同时，您需要取消注释 `server.js` 中 `/ahrefs-rankings`, `/semrush-rankings`, `/moz-metrics` 接口内的真实API调用逻辑，并根据各个API的最新文档进行调整。
+然后，在项目根目录运行以下命令进行部署：
+
+```bash
+npm run deploy
+```
+
+这将把您的Worker部署到Cloudflare。
 
 ## 使用说明
 
 1.  **域名管理**：在“域名管理”页面添加您要分析的域名。
 2.  **网站分析**：在“网站分析”页面选择一个域名，点击“开始分析”以获取网站结构、内容分析和违规建议（包括死链检测）。
 3.  **排名追踪**：在“排名追踪”页面选择一个域名，输入关键词（逗号分隔），点击“开始追踪”以获取关键词排名信息。
-4.  **设置**：在“设置”页面输入并保存您的API密钥和自定义爬虫名称。
+4.  **设置**：在“设置”页面输入并保存您的API密钥和自定义爬虫名称（这些将在浏览器LocalStorage中保存，并用于发送给Worker）。
 
 ## 局限性与未来增强
 
-*   **API 密钥安全**：目前API密钥直接硬编码在代码中，建议在生产环境中使用环境变量或其他更安全的配置管理方案。
-*   **真实 API 集成**：目前第三方SEO API（Ahrefs, SEMrush, Moz）仍在使用模拟数据。需要根据各自的API文档，在 `server.js` 中完成真实的API调用逻辑。
+*   **API 密钥安全**：虽然前端可以输入API密钥，但它们存储在浏览器LocalStorage中，这存在安全风险。在生产环境中，API密钥应仅存储在后端（通过Cloudflare Worker环境变量或安全的配置管理系统）。
+*   **真实 API 集成**：目前第三方SEO API（Ahrefs, SEMrush, Moz）仍在使用模拟数据。需要根据各自的API文档，在 `api/*.js` 文件中完成真实的API调用逻辑。
 *   **错误处理和用户反馈**：可以进一步完善前端和后端的错误处理机制，提供更友好的用户体验。
-*   **数据持久化**：目前数据主要存储在浏览器LocalStorage，对于更复杂的数据分析和历史趋势，可以考虑集成数据库。
-*   **UI/UX**：可以引入图表库（如Chart.js）来可视化排名趋势和分析数据。
+*   **数据持久化**：目前前端数据主要存储在浏览器LocalStorage，对于更复杂的数据分析和历史趋势，可以考虑集成Cloudflare KV或其他数据库服务。
+*   **UI/UX**：可以引入更丰富的图表库来可视化排名趋势和分析数据。
 
 ## 贡献
 
