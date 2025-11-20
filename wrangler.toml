@@ -1,8 +1,10 @@
 name = "seowebsite"
 main = "worker.js"
 compatibility_date = "2025-11-20"
-type = "javascript"
 
 [build]
 command = "npm run build"
-upload.format = "modules"
+
+[[kv_namespaces]]
+binding = "__STATIC_CONTENT"
+id = "__seowebsite-workers_sites_assets"
