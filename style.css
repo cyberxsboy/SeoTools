@@ -1,0 +1,239 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+header {
+    background-color: #333;
+    color: #fff;
+    padding: 1rem 0;
+    text-align: center;
+}
+
+header h1 {
+    margin: 0;
+}
+
+nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+}
+
+nav ul li {
+    margin: 0 15px;
+}
+
+nav ul li a {
+    color: #fff;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+main {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 20px auto;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+section {
+    display: none; /* 默认隐藏所有section，通过JS控制显示 */
+}
+
+section.active {
+    display: block;
+}
+
+footer {
+    text-align: center;
+    padding: 1rem 0;
+    background-color: #333;
+    color: #fff;
+    position: relative;
+    bottom: 0;
+    width: 100%;
+}
+
+.domain-input-group {
+    display: flex;
+    margin-bottom: 20px;
+}
+
+.domain-input-group input {
+    flex-grow: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px 0 0 4px;
+}
+
+.domain-input-group button {
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 0 4px 4px 0;
+    cursor: pointer;
+}
+
+.domain-input-group button:hover {
+    background-color: #0056b3;
+}
+
+#domain-list {
+    list-style: none;
+    padding: 0;
+}
+
+#domain-list li {
+    background-color: #f9f9f9;
+    border: 1px solid #eee;
+    padding: 10px;
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#domain-list li .actions button {
+    margin-left: 10px;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#domain-list li .actions .edit-btn {
+    background-color: #ffc107;
+    color: #333;
+}
+
+#domain-list li .actions .edit-btn:hover {
+    background-color: #e0a800;
+}
+
+#domain-list li .actions .delete-btn {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+#domain-list li .actions .delete-btn:hover {
+    background-color: #c82333;
+}
+
+.analysis-input-group {
+    display: flex;
+    margin-bottom: 20px;
+}
+
+.analysis-input-group select {
+    flex-grow: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px 0 0 4px;
+    margin-right: -1px; /* 避免双边框 */
+}
+
+.analysis-input-group button {
+    padding: 10px 15px;
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    border-radius: 0 4px 4px 0;
+    cursor: pointer;
+}
+
+.analysis-input-group button:hover {
+    background-color: #218838;
+}
+
+#analysis-results {
+    margin-top: 20px;
+    border: 1px solid #ddd;
+    padding: 15px;
+    background-color: #f9f9f9;
+}
+
+#analysis-output {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.rank-tracking-input-group,
+.setting-item {
+    display: flex;
+    margin-bottom: 15px;
+    align-items: center;
+}
+
+.rank-tracking-input-group select,
+.rank-tracking-input-group input[type="text"] {
+    flex-grow: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-right: 10px;
+}
+
+.rank-tracking-input-group button {
+    padding: 10px 15px;
+    background-color: #17a2b8;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.rank-tracking-input-group button:hover {
+    background-color: #138496;
+}
+
+#rank-tracking-results {
+    margin-top: 20px;
+    border: 1px solid #ddd;
+    padding: 15px;
+    background-color: #f9f9f9;
+}
+
+#rank-output {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.setting-item label {
+    min-width: 180px; /* 确保标签宽度一致 */
+    margin-right: 10px;
+}
+
+.setting-item input[type="text"] {
+    flex-grow: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+#save-settings-btn {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+#save-settings-btn:hover {
+    background-color: #0056b3;
+}
+
+#settings-status {
+    margin-top: 10px;
+    color: green;
+    font-weight: bold;
+}

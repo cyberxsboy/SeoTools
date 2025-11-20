@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEO蜘蛛池工具</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>SEO蜘蛛池工具</h1>
+        <nav>
+            <ul>
+                <li><a href="#dashboard">控制台</a></li>
+                <li><a href="#domain-management">域名管理</a></li>
+                <li><a href="#analysis">网站分析</a></li>
+                <li><a href="#rank-tracking">排名追踪</a></li>
+                <li><a href="#settings">设置</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section id="dashboard" class="active">
+            <h2>控制台</h2>
+            <p>欢迎使用SEO蜘蛛池工具！</p>
+            <!-- 更多控制台内容 -->
+        </section>
+
+        <section id="domain-management">
+            <h2>域名管理</h2>
+            <div class="domain-input-group">
+                <input type="text" id="domain-name-input" placeholder="请输入域名 (例如: example.com)">
+                <button id="add-domain-btn">添加域名</button>
+            </div>
+            <ul id="domain-list">
+                <!-- 域名将在这里动态加载 -->
+            </ul>
+        </section>
+
+        <section id="analysis">
+            <h2>网站分析</h2>
+            <div class="analysis-input-group">
+                <select id="analysis-domain-select">
+                    <option value="">请选择一个域名</option>
+                </select>
+                <button id="start-analysis-btn">开始分析</button>
+            </div>
+            <div id="analysis-results">
+                <h3>分析结果:</h3>
+                <pre id="analysis-output"></pre>
+            </div>
+        </section>
+
+        <section id="rank-tracking">
+            <h2>排名追踪</h2>
+            <div class="rank-tracking-input-group">
+                <select id="rank-tracking-domain-select">
+                    <option value="">请选择一个域名</option>
+                </select>
+                <input type="text" id="keyword-input" placeholder="请输入关键词，多个用逗号分隔">
+                <button id="track-ranking-btn">开始追踪</button>
+            </div>
+            <div id="rank-tracking-results">
+                <h3>排名结果:</h3>
+                <pre id="rank-output"></pre>
+            </div>
+        </section>
+
+        <section id="settings">
+            <h2>设置</h2>
+            <div class="setting-item">
+                <label for="google-api-key">Google Search Console API Key:</label>
+                <input type="text" id="google-api-key" placeholder="请输入您的Google API Key">
+            </div>
+            <div class="setting-item">
+                <label for="other-seo-api-key">Ahrefs/SEMrush/Moz API Key:</label>
+                <input type="text" id="other-seo-api-key" placeholder="请输入SEO工具的API Key">
+            </div>
+            <div class="setting-item">
+                <label for="ai-crawler-name">AI搜索爬虫名称 (多个用逗号分隔):</label>
+                <input type="text" id="ai-crawler-name" placeholder="例如: GeminiBot, ChatGPTCrawler">
+            </div>
+            <button id="save-settings-btn">保存设置</button>
+            <div id="settings-status"></div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 SEO蜘蛛池工具</p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
