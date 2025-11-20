@@ -3,6 +3,16 @@ main = "worker.js"
 compatibility_date = "2025-11-20"
 type = "javascript" # 明确指定Worker类型为JavaScript
 
+<<<<<<< HEAD
+=======
+
+# KV 绑定，用于存储静态文件
+[[kv_namespaces]] # 使用双括号表示数组元素
+binding = "ASSETS"
+id = "bdd9ab219a4b4634ae584547333df593" # *** 在这里填入您的实际 KV Namespace ID ***
+
+
+>>>>>>> 47b85758a008bfb0132a3c3f72a0fb39ec249fbc
 # 静态资产配置
 [build]
 command = "npm run build" # 可以定义一个构建命令，如果需要预处理静态文件
@@ -19,4 +29,13 @@ bucket = "./public" # 指向静态文件所在的目录
 # AHREFS_API_KEY = "your_ahrefs_api_key"
 # SEMRUSH_API_KEY = "your_semrush_api_key"
 # MOZ_ACCESS_ID = "your_moz_access_id"
+<<<<<<< HEAD
 # MOZ_SECRET_KEY = "your_moz_secret_key"
+=======
+# MOZ_SECRET_KEY = "your_moz_secret_key"
+
+name = "seowebsite"
+main = "worker.js"
+compatibility_date = "2025-11-20"
+type = "javascript" # 明确指定Worker类型为JavaScript
+>>>>>>> 47b85758a008bfb0132a3c3f72a0fb39ec249fbc
