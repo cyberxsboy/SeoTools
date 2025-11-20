@@ -25,13 +25,14 @@ export default {
     // 静态文件服务
     if (url.pathname === '/' || url.pathname.endsWith('.html') || url.pathname.endsWith('.css') || url.pathname.endsWith('.js')) {
       console.log('Attempting to serve static asset directly from KV.'); 
-      const filePath = url.pathname === '/' ? 'public/index.html' : `public${url.pathname}`;
+      // 修正filePath的构建方式，移除硬编码的'public/'前缀
+      const filePath = url.pathname === '/' ? 'index.html' : url.pathname.substring(1); // 移除/public前缀
       console.log(`Resolved KV file path: ${filePath}`);
 
       try {
         const asset = await env.ASSETS.get(filePath); // 直接从KV中获取文件内容
         if (asset === null) {
-          console.error(`Asset not found in KV: ${filePath}`);
+          console.error(`Asset not found in KV for path: ${filePath}`);
           return new Response('Asset not found', { status: 404 });
         }
 
