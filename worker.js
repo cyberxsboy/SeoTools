@@ -23,44 +23,30 @@ export default {
     const url = new URL(request.url);
     console.log(`Incoming request for: ${url.pathname}`);
 
-    // Attempt to serve static assets first using kv-asset-handler
-    if (url.pathname.startsWith('/api/')) {
-        // This is an API route, skip asset handling and go to API logic
-    } else {
-        try {
-            // Check if it's the root path or a path that should serve index.html
-            if (url.pathname === '/' || url.pathname.endsWith('.html')) {
-                return await getAssetFromKV(
-                    {
-                        request,
-                        waitUntil(promise) {
-                            return ctx.waitUntil(promise);
-                        },
-                    },
-                    {
-                        ASSET_NAMESPACE: env.__STATIC_CONTENT,
-                        ASSET_MANIFEST: globalThis.__STATIC_CONTENT_MANIFEST,
-                    }
-                );
-            }
-
-            // For other static assets (CSS, JS, images, etc.)
-            return await getAssetFromKV(
-                {
-                    request,
-                    waitUntil(promise) {
-                        return ctx.waitUntil(promise);
-                    },
-                },
-                {
-                    ASSET_NAMESPACE: env.__STATIC_CONTENT,
-                    ASSET_MANIFEST: globalThis.__STATIC_CONTENT_MANIFEST,
-                }
-            );
-        } catch (e) {
-            console.error('Error serving static asset with kv-asset-handler:', e);
-            // If it's not a static asset or not found, fall through to API handling or 404
-        }
+    // Try to serve static assets first. If not found, it will fall through to API routes.
+    // We only attempt to serve static assets if the path doesn't start with /api/
+    if (!url.pathname.startsWith('/api/')) {
+      try {
+        return await getAssetFromKV(
+          {
+            request,
+            waitUntil(promise) {
+              return ctx.waitUntil(promise);
+            },
+          },
+          {
+            ASSET_NAMESPACE: env.__STATIC_CONTENT,
+            ASSET_MANIFEST: globalThis.__STATIC_CONTENT_MANIFEST,
+          }
+        );
+      } catch (e) {
+        // If the asset is not found, log the error and continue to API handling
+        console.error('Error serving static asset with kv-asset-handler:', e);
+        // Depending on the type of error (e.g., NotFoundError from kv-asset-handler),
+        // you might want to handle it more specifically.
+        // For now, if getAssetFromKV fails for a non-API path, we assume it's not a static asset
+        // and let it fall through to the API handling or the final 404.
+      }
     }
 
 
