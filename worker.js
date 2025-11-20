@@ -1,10 +1,9 @@
-import { getAssetFromKV } from '@cloudflare/kv-asset-handler';
 import { getAhrefsRankings } from './api/ahrefs';
 import { getSemrushRankings } from './api/semrush';
 import { getMozMetrics } from './api/moz';
 
-// globalThis.__STATIC_CONTENT_MANIFEST will be automatically injected by Wrangler
-// when using Workers Sites (with [site] in wrangler.toml)
+// Removed getMimeType function as Cloudflare Response handles it automatically for common types
+// For unusual types, a default of 'application/octet-stream' or explicit setting might be needed.
 
 export default {
   async fetch(request, env, ctx) {
@@ -23,36 +22,46 @@ export default {
     const url = new URL(request.url);
     console.log(`Incoming request for: ${url.pathname}`);
 
-    // Try to serve static assets first. If not found, it will fall through to API routes.
-    // We only attempt to serve static assets if the path doesn't start with /api/
-    if (!url.pathname.startsWith('/api/')) {
-      try {
-        return await getAssetFromKV(
-          {
-            request,
-            waitUntil(promise) {
-              return ctx.waitUntil(promise);
-            },
-          },
-          {
-            ASSET_NAMESPACE: env.__STATIC_CONTENT,
-            ASSET_MANIFEST: globalThis.__STATIC_CONTENT_MANIFEST,
-          }
-        );
-      } catch (e) {
-        // If the asset is not found, log the error and continue to API handling
-        console.error('Error serving static asset with kv-asset-handler:', e);
-        console.error('Asset handling error details:');
-        console.error('Error name:', e.name);
-        console.error('Error message:', e.message);
-        console.error('Error stack:', e.stack);
-        // Depending on the type of error (e.g., NotFoundError from kv-asset-handler),
-        // you might want to handle it more specifically.
-        // For now, if getAssetFromKV fails for a non-API path, we assume it's not a static asset
-        // and let it fall through to the API handling or the final 404.
-      }
+    // Logic to serve static assets directly from KV
+    let filePath = url.pathname;
+    if (filePath.startsWith('/')) {
+      filePath = filePath.substring(1); // Remove leading slash
     }
 
+    // If the path is empty or refers to root, serve index.html
+    if (filePath === '' || filePath === 'index.html') {
+      filePath = 'public/index.html';
+    } else if (!filePath.startsWith('public/')) {
+      // Prefix other static assets with 'public/' if not already prefixed
+      filePath = 'public/' + filePath;
+    }
+
+    // Check if it's a request for a known static asset type (simplified check)
+    // Cloudflare's Response will infer Content-Type for many common types.
+    // If you need specific handling for less common types, reintroduce getMimeType.
+    const isStaticAsset = filePath.endsWith('.html') || filePath.endsWith('.css') || filePath.endsWith('.js') ||
+                                  filePath.endsWith('.png') || filePath.endsWith('.jpg') || filePath.endsWith('.jpeg') ||
+                                  filePath.endsWith('.gif') || filePath.endsWith('.svg') || filePath.endsWith('.ico');
+
+
+    if (isStaticAsset) {
+      console.log(`Attempting to serve static asset directly from KV: ${filePath}`);
+      try {
+        const asset = await env.__STATIC_CONTENT.get(filePath, { type: "arrayBuffer" });
+        if (asset === null) {
+          console.error(`Asset not found in KV for path: ${filePath}`);
+          // For debugging, we can return a specific error for asset not found
+          return new Response(`Asset not found: ${filePath}`, { status: 404 });
+        }
+
+        // Cloudflare's Response will infer Content-Type for common files.
+        // For more control, you could reintroduce getMimeType or use a mapping.
+        return new Response(asset);
+      } catch (e) {
+        console.error(`Error serving static asset ${filePath} directly from KV:`, e);
+        return new Response(`Error serving static asset: ${e.message || 'Unknown error'}`, { status: 500 });
+      }
+    }
 
     if (url.pathname === '/fetch-website-content') {
       console.log('Handling /fetch-website-content API call.');
