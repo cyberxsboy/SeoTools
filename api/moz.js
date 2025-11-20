@@ -1,16 +1,13 @@
 const axios = require('axios');
 const crypto = require('crypto');
 
-const MOZ_ACCESS_ID = process.env.MOZ_ACCESS_ID;
-const MOZ_SECRET_KEY = process.env.MOZ_SECRET_KEY;
-
-async function getMozMetrics(domain) {
-    if (!MOZ_ACCESS_ID || !MOZ_SECRET_KEY) {
-        console.warn('Moz API credentials are not configured, returning simulated data.');
+async function getMozMetrics(domain, mozAccessId, mozSecretKey) {
+    if (!mozAccessId || !mozSecretKey) {
+        console.warn('Moz API credentials are not provided, returning simulated data.');
         return {
             domainAuthority: Math.floor(Math.random() * 100) + 1,
             pageAuthority: Math.floor(Math.random() * 100) + 1,
-            warning: 'Moz API credentials are not configured, returning simulated data.'
+            warning: 'Moz API credentials are not provided, returning simulated data.'
         };
     }
 
@@ -22,12 +19,12 @@ async function getMozMetrics(domain) {
         // 示例：获取URL Metrics (Domain Authority, Page Authority等)
         /*
         const expires = Math.floor(Date.now() / 1000) + 300; // 5分钟后过期
-        const stringToSign = `${MOZ_ACCESS_ID}\n${expires}`;
-        const hmac = crypto.createHmac('sha1', MOZ_SECRET_KEY);
+        const stringToSign = `${mozAccessId}\n${expires}`;
+        const hmac = crypto.createHmac('sha1', mozSecretKey);
         hmac.update(stringToSign);
         const signature = hmac.digest('base64');
 
-        const mozApiUrl = `http://lsapi.seomoz.com/linkscape/url-metrics/${encodeURIComponent(domain)}?Cols=103079215104&AccessID=${MOZ_ACCESS_ID}&Expires=${expires}&Signature=${encodeURIComponent(signature)}`;
+        const mozApiUrl = `http://lsapi.seomoz.com/linkscape/url-metrics/${encodeURIComponent(domain)}?Cols=103079215104&AccessID=${mozAccessId}&Expires=${expires}&Signature=${encodeURIComponent(signature)}`;
 
         const mozResponse = await axios.get(mozApiUrl);
 

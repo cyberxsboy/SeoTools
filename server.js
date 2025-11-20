@@ -33,7 +33,7 @@ app.post('/fetch-website-content', async (req, res) => {
 
 // 排名追踪代理接口
 app.post('/track-ranking', async (req, res) => {
-    const { domain, keywords } = req.body;
+    const { domain, keywords, ahrefsApiKey, semrushApiKey } = req.body;
     if (!domain || !keywords || !Array.isArray(keywords) || keywords.length === 0) {
         return res.status(400).json({ error: 'Domain and keywords are required' });
     }
@@ -43,7 +43,7 @@ app.post('/track-ranking', async (req, res) => {
     for (const keyword of keywords) {
         // 调用Ahrefs API
         try {
-            const ahrefsRankings = await getAhrefsRankings(domain, keyword);
+            const ahrefsRankings = await getAhrefsRankings(domain, keyword, ahrefsApiKey);
             allRankings.push(...ahrefsRankings);
         } catch (error) {
             console.warn(`Failed to get ranking for keyword ${keyword} from Ahrefs:`, error.message);
@@ -51,7 +51,7 @@ app.post('/track-ranking', async (req, res) => {
 
         // 调用SEMrush API
         try {
-            const semrushRankings = await getSemrushRankings(domain, keyword);
+            const semrushRankings = await getSemrushRankings(domain, keyword, semrushApiKey);
             allRankings.push(...semrushRankings);
         } catch (error) {
             console.warn(`Failed to get ranking for keyword ${keyword} from SEMrush:`, error.message);
@@ -63,14 +63,14 @@ app.post('/track-ranking', async (req, res) => {
 
 // Moz Metrics 代理接口
 app.post('/moz-metrics', async (req, res) => {
-    const { domain } = req.body;
+    const { domain, mozAccessId, mozSecretKey } = req.body;
 
     if (!domain) {
         return res.status(400).json({ error: 'Domain is required for Moz' });
     }
 
     try {
-        const mozMetrics = await getMozMetrics(domain);
+        const mozMetrics = await getMozMetrics(domain, mozAccessId, mozSecretKey);
         res.json({ metrics: mozMetrics });
     } catch (error) {
         console.error('Error calling Moz API:', error.message);

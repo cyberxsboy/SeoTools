@@ -1,10 +1,8 @@
 const axios = require('axios');
 
-const SEMRUSH_API_KEY = process.env.SEMRUSH_API_KEY;
-
-async function getSemrushRankings(domain, keyword) {
-    if (!SEMRUSH_API_KEY) {
-        console.warn('SEMrush API Key is not configured, returning simulated data.');
+async function getSemrushRankings(domain, keyword, semrushApiKey) {
+    if (!semrushApiKey) {
+        console.warn('SEMrush API Key is not provided, returning simulated data.');
         return [{
             keyword: keyword,
             searchEngine: 'Google (SEMrush)',
@@ -23,15 +21,14 @@ async function getSemrushRankings(domain, keyword) {
         const semrushApiUrl = `https://api.semrush.com/analytics/v1/sitedomain/organic`;
         const semrushResponse = await axios.get(semrushApiUrl, {
             params: {
-                key: SEMRUSH_API_KEY,
+                key: semrushApiKey, // 使用传入的key
                 domain: domain,
-                export_columns: 'Ph,Po,Ur', // Keyword, Position, URL
-                phrase: keyword, // 如果API支持按关键词筛选
+                export_columns: 'Ph,Po,Ur', 
+                phrase: keyword, 
                 display_limit: 10
             }
         });
 
-        // 处理SEMrush API的响应数据，提取排名信息
         const realRankings = semrushResponse.data.split('\n').slice(1).map(line => {
             const [phrase, position, url] = line.split(';');
             return {

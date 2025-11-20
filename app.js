@@ -159,7 +159,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (!response.ok) {
-                // 如果HTTPS失败，尝试HTTP
                 targetUrl = `http://${selectedDomain}`;
                 response = await fetch(proxyUrl, {
                     method: 'POST',
@@ -269,13 +268,18 @@ document.addEventListener('DOMContentLoaded', () => {
             // Moz 权威度 (通过后端代理获取)
             analysisText += `\n--- 权威度指标 (Moz) ---\n`;
             try {
+                const settings = JSON.parse(localStorage.getItem('seoSettings')) || {};
                 const mozProxyUrl = `http://localhost:3000/moz-metrics`;
                 const mozResponse = await fetch(mozProxyUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ domain: selectedDomain }),
+                    body: JSON.stringify({
+                        domain: selectedDomain,
+                        mozAccessId: settings.mozAccessId,
+                        mozSecretKey: settings.mozSecretKey
+                    }),
                 });
 
                 if (!mozResponse.ok) {
@@ -418,13 +422,19 @@ document.addEventListener('DOMContentLoaded', () => {
         if (rankingChart) rankingChart.destroy();
 
         try {
+            const settings = JSON.parse(localStorage.getItem('seoSettings')) || {};
             const proxyUrl = `http://localhost:3000/track-ranking`;
             const response = await fetch(proxyUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ domain: selectedDomain, keywords: keywords.split(',').map(k => k.trim()) }),
+                body: JSON.stringify({
+                    domain: selectedDomain,
+                    keywords: keywords.split(',').map(k => k.trim()),
+                    ahrefsApiKey: settings.ahrefsApiKey,
+                    semrushApiKey: settings.semrushApiKey
+                }),
             });
 
             if (!response.ok) {
@@ -462,21 +472,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 设置逻辑
     const googleApiKeyInput = document.getElementById('google-api-key');
-    const otherSeoApiKeyInput = document.getElementById('other-seo-api-key');
+    const ahrefsApiKeyInput = document.getElementById('ahrefs-api-key'); // 更名为ahrefs-api-key
+    const semrushApiKeyInput = document.getElementById('semrush-api-key'); // 新增
+    const mozAccessIdInput = document.getElementById('moz-access-id'); // 新增
+    const mozSecretKeyInput = document.getElementById('moz-secret-key'); // 新增
     const aiCrawlerNameInput = document.getElementById('ai-crawler-name');
     const saveSettingsBtn = document.getElementById('save-settings-btn');
 
     const loadSettings = () => {
         const settings = JSON.parse(localStorage.getItem('seoSettings')) || {};
         googleApiKeyInput.value = settings.googleApiKey || '';
-        otherSeoApiKeyInput.value = settings.ahrefsApiKey || '';
+        ahrefsApiKeyInput.value = settings.ahrefsApiKey || '';
+        semrushApiKeyInput.value = settings.semrushApiKey || '';
+        mozAccessIdInput.value = settings.mozAccessId || '';
+        mozSecretKeyInput.value = settings.mozSecretKey || '';
         aiCrawlerNameInput.value = settings.aiCrawlerName || '';
     };
 
     const saveSettings = () => {
         const settings = {
             googleApiKey: googleApiKeyInput.value.trim(),
-            ahrefsApiKey: otherSeoApiKeyInput.value.trim(),
+            ahrefsApiKey: ahrefsApiKeyInput.value.trim(),
+            semrushApiKey: semrushApiKeyInput.value.trim(),
+            mozAccessId: mozAccessIdInput.value.trim(),
+            mozSecretKey: mozSecretKeyInput.value.trim(),
             aiCrawlerName: aiCrawlerNameInput.value.trim(),
         };
         localStorage.setItem('seoSettings', JSON.stringify(settings));

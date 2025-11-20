@@ -1,10 +1,8 @@
 const axios = require('axios');
 
-const AHREFS_API_KEY = process.env.AHREFS_API_KEY;
-
-async function getAhrefsRankings(domain, keyword) {
-    if (!AHREFS_API_KEY) {
-        console.warn('Ahrefs API Key is not configured, returning simulated data.');
+async function getAhrefsRankings(domain, keyword, ahrefsApiKey) {
+    if (!ahrefsApiKey) {
+        console.warn('Ahrefs API Key is not provided, returning simulated data.');
         return [{
             keyword: keyword,
             searchEngine: 'Google (Ahrefs)',
@@ -24,17 +22,16 @@ async function getAhrefsRankings(domain, keyword) {
         const ahrefsResponse = await axios.get(ahrefsApiUrl, {
             headers: {
                 'Accept': 'application/json',
-                'Authorization': `Bearer ${AHREFS_API_KEY}`
+                'Authorization': `Bearer ${ahrefsApiKey}` // 使用传入的key
             },
             params: {
                 target: domain,
                 output: 'json',
-                limit: 10, // 获取前10个关键词
-                // keyword: keyword // 如果Ahrefs API支持按关键词筛选
+                limit: 10, 
+                // keyword: keyword 
             }
         });
 
-        // 处理Ahrefs API的响应数据，提取排名信息
         const realRankings = ahrefsResponse.data.keywords.map(item => ({
             keyword: item.keyword,
             searchEngine: 'Google (Ahrefs)',
