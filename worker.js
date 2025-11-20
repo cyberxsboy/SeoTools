@@ -25,7 +25,7 @@ export default {
       try {
         return await getAssetFromKV(request, {
           ASSET_NAMESPACE: env.ASSETS,
-          ASSET_MANIFEST: __STATIC_CONTENT_MANIFEST,
+          ASSET_MANIFEST: seowebsite-workers_sites_assets,
         });
       } catch (e) {
         console.error(`Error serving static asset ${url.pathname}:`, e);
