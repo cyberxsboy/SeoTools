@@ -1,13 +1,19 @@
 name = "seowebsite"
 main = "worker.js"
 compatibility_date = "2025-11-20"
+type = "javascript" # 明确指定Worker类型为JavaScript
 
 # KV 绑定，用于存储静态文件
-# 移除冲突的[kv_namespaces]表定义
-
 [[kv_namespaces]] # 使用双括号表示数组元素
 binding = "ASSETS"
-id = "a01b6f73dd624dafb838b2f033dc47f8" # *** 在这里填入您的实际 KV Namespace ID ***
+id = "YOUR_KV_NAMESPACE_ID" # *** 在这里填入您的实际 KV Namespace ID ***
+
+# 静态资产配置
+[build]
+command = "npm run build" # 可以定义一个构建命令，如果需要预处理静态文件
+
+[site]
+bucket = "./public" # 指向静态文件所在的目录
 
 # 如果需要环境变量，可以在此处配置
 [vars]
