@@ -5,19 +5,29 @@ import { getMozMetrics } from './api/moz';
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+    console.log(`Incoming request for: ${url.pathname}`); // 调试日志
 
     // 静态文件服务
-    // 当请求路径匹配静态文件时，使用env.ASSETS.fetch来服务
     if (url.pathname === '/' || url.pathname.endsWith('.html') || url.pathname.endsWith('.css') || url.pathname.endsWith('.js')) {
-      // 对于根路径，重写为 /index.html
+      console.log('Attempting to serve static asset.'); // 调试日志
       const filePath = url.pathname === '/' ? '/index.html' : url.pathname;
-      // 创建一个新的Request对象，确保路径正确，并且可以由env.ASSETS.fetch处理
-      const assetRequest = new Request(new URL(filePath, request.url).toString(), request);
-      return env.ASSETS.fetch(assetRequest);
+      console.log(`Serving file path: ${filePath}`); // 调试日志
+
+      try {
+        // 创建一个新的Request对象，确保路径正确，并且可以由env.ASSETS.fetch处理
+        const assetRequest = new Request(new URL(filePath, request.url).toString(), request);
+        const response = await env.ASSETS.fetch(assetRequest);
+        console.log(`Asset fetch response status: ${response.status}`); // 调试日志
+        return response;
+      } catch (e) {
+        console.error(`Error serving static asset ${filePath}:`, e); // 错误日志
+        return new Response(`Error serving static asset: ${e.message}`, { status: 500 });
+      }
     }
 
     // 后端代理API处理
     if (url.pathname === '/fetch-website-content') {
+      console.log('Handling /fetch-website-content API call.'); // 调试日志
       if (request.method !== 'POST') {
         return new Response('Method Not Allowed', { status: 405 });
       }
@@ -40,6 +50,7 @@ export default {
     }
 
     if (url.pathname === '/track-ranking') {
+      console.log('Handling /track-ranking API call.'); // 调试日志
       if (request.method !== 'POST') {
         return new Response('Method Not Allowed', { status: 405 });
       }
@@ -71,6 +82,7 @@ export default {
     }
 
     if (url.pathname === '/moz-metrics') {
+      console.log('Handling /moz-metrics API call.'); // 调试日志
       if (request.method !== 'POST') {
         return new Response('Method Not Allowed', { status: 405 });
       }
@@ -89,6 +101,7 @@ export default {
       }
     }
 
+    console.log(`Path not found: ${url.pathname}`); // 调试日志
     return new Response('Not Found', { status: 404 });
   },
 };
