@@ -28,9 +28,18 @@ export default {
 
     // Try to serve static assets directly from KV
     if (!url.pathname.startsWith('/api/')) {
-      const assetPath = assetManifest[url.pathname] || assetManifest['/'];
+      let assetPath = assetManifest[url.pathname];
+      if (!assetPath && url.pathname === '/') {
+        assetPath = assetManifest['/'];
+      }
+      console.log(`Resolved assetPath: ${assetPath}`);
+
       if (assetPath) {
-        const content = await env.__STATIC_CONTENT.get(`public/${assetPath}`);
+        const kvKey = `public/${assetPath}`;
+        console.log(`Attempting to get KV key: ${kvKey}`);
+        const content = await env.__STATIC_CONTENT.get(kvKey);
+        console.log(`Content for ${kvKey} is null: ${content === null}`);
+
         if (content) {
           const headers = new Headers();
           if (assetPath.endsWith('.html')) {
