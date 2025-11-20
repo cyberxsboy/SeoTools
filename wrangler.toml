@@ -6,7 +6,7 @@ type = "javascript" # 明确指定Worker类型为JavaScript
 # KV 绑定，用于存储静态文件
 [[kv_namespaces]] # 使用双括号表示数组元素
 binding = "ASSETS"
-id = "YOUR_KV_NAMESPACE_ID" # *** 在这里填入您的实际 KV Namespace ID ***
+id = "a01b6f73dd624dafb838b2f033dc47f8" # *** 在这里填入您的实际 KV Namespace ID ***
 
 # 静态资产配置
 [build]
