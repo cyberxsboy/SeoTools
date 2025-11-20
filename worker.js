@@ -14,7 +14,7 @@ export default {
       try {
         return await getAssetFromKV(request, {
           ASSET_NAMESPACE: env.ASSETS, 
-          ASSET_MANIFEST: __STATIC_CONTENT_MANIFEST, // 直接访问全局变量
+          ASSET_MANIFEST: __STATIC_CONTENT_MANIFEST, // 确保这里是直接引用全局变量，没有TypeScript语法
         });
       } catch (e) {
         console.error(`Error serving static asset ${url.pathname}:`, e); 
