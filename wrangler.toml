@@ -6,6 +6,3 @@ type = "javascript"
 [build]
 command = "npm run build"
 upload.format = "modules"
-
-[site]
-bucket = "./public"
