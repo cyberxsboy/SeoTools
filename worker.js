@@ -5,6 +5,20 @@ import { getAssetFromKV } from '@cloudflare/kv-asset-handler';
 
 export default {
   async fetch(request, env, ctx) {
+    // --- 调试日志：检查请求对象 --- Start
+    console.log('--- Incoming Request Debug ---');
+    console.log('Request method:', request.method);
+    console.log('Request URL:', request.url); // 直接打印 request.url
+    try {
+      const parsedUrl = new URL(request.url);
+      console.log('Parsed URL pathname:', parsedUrl.pathname);
+      console.log('Parsed URL origin:', parsedUrl.origin);
+    } catch (e) {
+      console.error('Error parsing request URL:', e);
+    }
+    console.log('--- Incoming Request Debug --- End');
+    // --- 调试日志：检查请求对象 --- End
+
     const url = new URL(request.url);
     console.log(`Incoming request for: ${url.pathname}`); 
 
