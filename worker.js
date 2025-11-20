@@ -24,8 +24,8 @@ export default {
       console.log('Attempting to serve static asset using getAssetFromKV with manifest.');
       try {
         return await getAssetFromKV(request, {
-          ASSET_NAMESPACE: env.ASSETS,
-          ASSET_MANIFEST: seowebsite-workers_sites_assets,
+          ASSET_NAMESPACE: env.__STATIC_CONTENT,
+          ASSET_MANIFEST: __STATIC_CONTENT_MANIFEST,
         });
       } catch (e) {
         console.error(`Error serving static asset ${url.pathname}:`, e);
