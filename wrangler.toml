@@ -1,4 +1,4 @@
-name = "seo-spider-pool-worker"
+name = "seowebsite"
 main = "worker.js"
 compatibility_date = "2025-11-20"
 
