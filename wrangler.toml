@@ -15,7 +15,7 @@ id = "bdd9ab219a4b4634ae584547333df593" # *** 在这里填入您的实际 KV Nam
 command = "npm run build" # 可以定义一个构建命令，如果需要预处理静态文件
 
 [site]
-bucket = "/" # 指向静态文件所在的目录
+bucket = "./public" # 指向静态文件所在的目录
 
 # 如果需要环境变量，可以在此处配置
 [vars]
