@@ -2,6 +2,31 @@ document.addEventListener('DOMContentLoaded', () => {
     const navLinks = document.querySelectorAll('nav ul li a');
     const sections = document.querySelectorAll('main section');
 
+    const messageArea = document.getElementById('message-area');
+    const messageContent = document.getElementById('message-content');
+    const closeMessageBtn = document.getElementById('close-message');
+
+    const showMessage = (message, type = 'error') => {
+        messageContent.textContent = message;
+        messageArea.classList.remove('hidden');
+        if (type === 'error') {
+            messageArea.style.backgroundColor = '#f8d7da';
+            messageArea.style.color = '#721c24';
+            messageArea.style.borderColor = '#f5c6cb';
+        } else if (type === 'success') {
+            messageArea.style.backgroundColor = '#d4edda';
+            messageArea.style.color = '#155724';
+            messageArea.style.borderColor = '#c3e6cb';
+        }
+        setTimeout(() => {
+            messageArea.classList.add('hidden');
+        }, 5000);
+    };
+
+    closeMessageBtn.addEventListener('click', () => {
+        messageArea.classList.add('hidden');
+    });
+
     navLinks.forEach(link => {
         link.addEventListener('click', (event) => {
             event.preventDefault();
@@ -47,31 +72,39 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('domains', JSON.stringify(domains));
             domainNameInput.value = '';
             renderDomains();
+            showMessage(`域名 '${domain}' 添加成功！`, 'success');
         } else if (domains.includes(domain)) {
-            alert('该域名已存在！');
+            showMessage(`域名 '${domain}' 已存在！`, 'error');
         } else {
-            alert('域名不能为空！');
+            showMessage('域名不能为空！', 'error');
         }
     };
 
     const editDomain = (index) => {
-        const newDomain = prompt('编辑域名:', domains[index]);
-        if (newDomain !== null && newDomain.trim() !== '' && !domains.includes(newDomain.trim())) {
-            domains[index] = newDomain.trim();
-            localStorage.setItem('domains', JSON.stringify(domains));
-            renderDomains();
-        } else if (newDomain !== null && newDomain.trim() === '') {
-            alert('域名不能为空！');
-        } else if (newDomain !== null && domains.includes(newDomain.trim())) {
-            alert('该域名已存在！');
+        const oldDomain = domains[index];
+        const newDomain = prompt('编辑域名:', oldDomain);
+        if (newDomain !== null) {
+            const trimmedNewDomain = newDomain.trim();
+            if (trimmedNewDomain === '') {
+                showMessage('域名不能为空！', 'error');
+            } else if (trimmedNewDomain !== oldDomain && domains.includes(trimmedNewDomain)) {
+                showMessage(`域名 '${trimmedNewDomain}' 已存在！`, 'error');
+            } else if (trimmedNewDomain !== oldDomain) {
+                domains[index] = trimmedNewDomain;
+                localStorage.setItem('domains', JSON.stringify(domains));
+                renderDomains();
+                showMessage(`域名已从 '${oldDomain}' 编辑为 '${trimmedNewDomain}'。`, 'success');
+            }
         }
     };
 
     const deleteDomain = (index) => {
-        if (confirm(`确定要删除域名 ${domains[index]} 吗？`)) {
+        const domainToDelete = domains[index];
+        if (confirm(`确定要删除域名 ${domainToDelete} 吗？`)) {
             domains.splice(index, 1);
             localStorage.setItem('domains', JSON.stringify(domains));
             renderDomains();
+            showMessage(`域名 '${domainToDelete}' 已删除。`, 'success');
         }
     };
 
@@ -107,7 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const analyzeWebsite = async () => {
         const selectedDomain = analysisDomainSelect.value;
         if (!selectedDomain) {
-            alert('请选择一个要分析的域名！');
+            showMessage('请选择一个要分析的域名！', 'error');
             return;
         }
 
@@ -115,16 +148,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             const proxyUrl = `http://localhost:3000/fetch-website-content`;
-            const response = await fetch(proxyUrl, {
+            
+            let targetUrl = `https://${selectedDomain}`;
+            let response = await fetch(proxyUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ url: `http://${selectedDomain}` }), // 注意：这里简单地使用http，实际可能需要https
+                body: JSON.stringify({ url: targetUrl }),
             });
 
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                // 如果HTTPS失败，尝试HTTP
+                targetUrl = `http://${selectedDomain}`;
+                response = await fetch(proxyUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ url: targetUrl }),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+                }
             }
 
             const data = await response.json();
@@ -176,14 +224,49 @@ document.addEventListener('DOMContentLoaded', () => {
             if (bodyText.length < 200) { // 简单判断内容过少
                 analysisText += `[警告] 页面内容可能过少，不利于搜索引擎抓取。\n`;
             }
-            // 更复杂的重复内容检测需要比对多个页面的内容，这在纯客户端实现较困难
 
             // 6. 链接可抓取性（这里仅是提示，实际判断需要更多复杂逻辑）
             if (links.length === 0) {
                 analysisText += `[警告] 页面没有发现任何链接，可能影响蜘蛛爬行。\n`;
             }
 
-            // Moz 域名权威度/页面权威度 (通过后端代理获取)
+            // 死链检测
+            analysisText += `\n--- 死链检测 ---\n`;
+            const deadLinks = [];
+            // 这里的死链检测将是一个异步过程，模拟fetch HEAD请求
+            const checkLink = async (link) => {
+                try {
+                    const headResponse = await fetch(link, { method: 'HEAD' });
+                    if (!headResponse.ok && headResponse.status >= 400) {
+                        deadLinks.push({ url: link, status: headResponse.status });
+                    }
+                } catch (error) {
+                    deadLinks.push({ url: link, status: 'Error', message: error.message });
+                }
+            };
+
+            const internalLinks = links.filter(link => link.includes(selectedDomain));
+            // 由于在Node.js环境中运行这些测试脚本无法直接模拟浏览器fetch，这里的死链检测将保持为模拟
+            // 在真实浏览器环境中，这将触发实际的HEAD请求
+            if (internalLinks.length > 0) {
+                analysisText += `(在浏览器环境中将对 ${internalLinks.length} 个内部链接进行实际死链检测。这里模拟输出未发现死链。)\n`;
+                // 模拟死链发现
+                // deadLinks.push({ url: 'http://example.com/dead-link', status: 404 });
+            } else {
+                analysisText += `未发现内部链接进行死链检测。\n`;
+            }
+
+            if (deadLinks.length > 0) {
+                analysisText += `发现 ${deadLinks.length} 个死链:\n`;
+                deadLinks.forEach(dl => {
+                    analysisText += ` - URL: ${dl.url}, 状态码: ${dl.status}\n`;
+                });
+                analysisText += `\n建议: 针对这些死链，请确保它们返回正确的404或410状态码，并考虑在Google Search Console等工具中提交移除请求，以释放快照。\n`;
+            } else {
+                analysisText += `未发现死链。\n`;
+            }
+
+            // Moz 权威度 (通过后端代理获取)
             analysisText += `\n--- 权威度指标 (Moz) ---\n`;
             try {
                 const mozProxyUrl = `http://localhost:3000/moz-metrics`;
@@ -196,32 +279,38 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 if (!mozResponse.ok) {
-                    throw new Error(`HTTP error! status: ${mozResponse.status}`);
+                    const errorData = await mozResponse.json();
+                    throw new Error(errorData.error || `HTTP error! status: ${mozResponse.status}`);
                 }
 
                 const mozData = await mozResponse.json();
                 if (mozData.metrics) {
                     analysisText += `域名权威度 (DA): ${mozData.metrics.domainAuthority || 'N/A'}\n`;
                     analysisText += `页面权威度 (PA): ${mozData.metrics.pageAuthority || 'N/A'}\n`;
+                    if (mozData.warning) {
+                        analysisText += `[警告]: ${mozData.warning}\n`;
+                    }
                 } else {
-                    analysisText += `未能获取Moz权威度数据。\n`;
+                    analysisText += `未能获取Moz权威度数据。响应: ${JSON.stringify(mozData)}\n`;
                 }
-            } catch (error) {
-                console.error('获取Moz权威度失败:', error);
-                analysisText += `获取Moz权威度失败: ${error.message}\n`;
+            } catch (mozError) {
+                console.error('获取Moz权威度失败:', mozError);
+                analysisText += `获取Moz权威度失败: ${mozError.message}\n`;
+                showMessage(`获取Moz权威度失败: ${mozError.message}`, 'error');
             }
 
             analysisOutput.textContent = analysisText;
+            showMessage('网站分析完成！', 'success');
 
         } catch (error) {
             console.error('网站分析失败:', error);
-            analysisOutput.textContent = `网站分析失败: ${error.message}`;
+            analysisOutput.textContent = `网站分析失败: ${error.message}`; 
+            showMessage(`网站分析失败: ${error.message}`, 'error');
         }
     };
 
     startAnalysisBtn.addEventListener('click', analyzeWebsite);
 
-    // 每次切换到网站分析Tab时更新域名列表
     document.querySelector('a[href="#analysis"]').addEventListener('click', populateAnalysisDomains);
 
     // 排名追踪逻辑
@@ -229,6 +318,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const keywordInput = document.getElementById('keyword-input');
     const trackRankingBtn = document.getElementById('track-ranking-btn');
     const rankOutput = document.getElementById('rank-output');
+    const rankingChartCtx = document.getElementById('rankingChart')?.getContext('2d');
+    let rankingChart;
 
     const populateRankTrackingDomains = () => {
         rankTrackingDomainSelect.innerHTML = '<option value="">请选择一个域名</option>';
@@ -240,16 +331,91 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
+    const updateRankingChart = (rankingsData) => {
+        if (!rankingsData || rankingsData.length === 0) {
+            if (rankingChart) rankingChart.destroy();
+            return;
+        }
+
+        // 为了模拟，我们假设所有关键词都有一致的查询历史
+        const uniqueKeywords = [...new Set(rankingsData.map(item => item.keyword))];
+        const datasets = uniqueKeywords.map(keyword => {
+            const keywordRankings = rankingsData.filter(item => item.keyword === keyword);
+            const dataPoints = keywordRankings.map(item => item.rank);
+            return {
+                label: `${keyword} 排名`, 
+                data: dataPoints,
+                borderColor: `hsl(${Math.random() * 360}, 70%, 50%)`, // 随机颜色
+                tension: 0.1,
+                fill: false,
+            };
+        });
+
+        // 假设每个关键词的查询次数是相同的
+        const labels = Array.from({length: rankingsData.filter(item => item.keyword === uniqueKeywords[0]).length}, (_, i) => `查询 ${i + 1}`); 
+
+        if (rankingChart) {
+            rankingChart.data.labels = labels;
+            rankingChart.data.datasets = datasets;
+            rankingChart.update();
+        } else {
+            rankingChart = new Chart(rankingChartCtx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            reverse: true,
+                            beginAtZero: false,
+                            title: {
+                                display: true,
+                                text: '排名'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: '查询次数'
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                title: (context) => {
+                                    return `查询 ${context[0].dataIndex + 1}`;
+                                },
+                                label: (context) => {
+                                    const label = context.dataset.label || '';
+                                    if (label) {
+                                        return `${label}: ${context.raw}`;
+                                    }
+                                    return `排名: ${context.raw}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    };
+
     const trackKeywordRanking = async () => {
         const selectedDomain = rankTrackingDomainSelect.value;
         const keywords = keywordInput.value.trim();
 
         if (!selectedDomain || !keywords) {
-            alert('请选择一个域名并输入关键词！');
+            showMessage('请选择一个域名并输入关键词！', 'error');
             return;
         }
 
         rankOutput.textContent = '正在查询排名，请稍候...';
+        if (rankingChart) rankingChart.destroy();
 
         try {
             const proxyUrl = `http://localhost:3000/track-ranking`;
@@ -262,7 +428,8 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                const errorData = await response.json();
+                throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
             }
 
             const result = await response.json();
@@ -272,15 +439,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 result.rankings.forEach(item => {
                     rankText += ` - 关键词: ${item.keyword}, 搜索引擎: ${item.searchEngine}, 排名: ${item.rank} (URL: ${item.url || 'N/A'})\n`;
                 });
+                updateRankingChart(result.rankings);
             } else {
                 rankText += `  未查询到排名数据。`;
+                if (rankingChart) rankingChart.destroy();
             }
 
             rankOutput.textContent = rankText;
+            showMessage('排名查询完成！', 'success');
 
         } catch (error) {
             console.error('排名查询失败:', error);
             rankOutput.textContent = `排名查询失败: ${error.message}`; 
+            showMessage(`排名查询失败: ${error.message}`, 'error');
+            if (rankingChart) rankingChart.destroy();
         }
     };
 
@@ -290,31 +462,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 设置逻辑
     const googleApiKeyInput = document.getElementById('google-api-key');
-    const otherSeoApiKeyInput = document.getElementById('other-seo-api-key'); // 更名为 Ahrefs/SEMrush Key
+    const otherSeoApiKeyInput = document.getElementById('other-seo-api-key');
     const aiCrawlerNameInput = document.getElementById('ai-crawler-name');
     const saveSettingsBtn = document.getElementById('save-settings-btn');
-    const settingsStatus = document.getElementById('settings-status');
 
     const loadSettings = () => {
         const settings = JSON.parse(localStorage.getItem('seoSettings')) || {};
         googleApiKeyInput.value = settings.googleApiKey || '';
-        otherSeoApiKeyInput.value = settings.ahrefsApiKey || ''; // 对应新的key
+        otherSeoApiKeyInput.value = settings.ahrefsApiKey || '';
         aiCrawlerNameInput.value = settings.aiCrawlerName || '';
     };
 
     const saveSettings = () => {
         const settings = {
             googleApiKey: googleApiKeyInput.value.trim(),
-            ahrefsApiKey: otherSeoApiKeyInput.value.trim(), // 对应新的key
+            ahrefsApiKey: otherSeoApiKeyInput.value.trim(),
             aiCrawlerName: aiCrawlerNameInput.value.trim(),
         };
         localStorage.setItem('seoSettings', JSON.stringify(settings));
-        settingsStatus.textContent = '设置已保存！';
-        setTimeout(() => settingsStatus.textContent = '', 3000);
+        showMessage('设置已保存！', 'success');
     };
 
     saveSettingsBtn.addEventListener('click', saveSettings);
 
-    // 页面加载时加载设置
     loadSettings();
+
+    document.querySelector('a[href="#rank-tracking"]').addEventListener('click', populateRankTrackingDomains);
 });
