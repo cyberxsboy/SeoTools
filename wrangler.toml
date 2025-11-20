@@ -1,48 +1,11 @@
-    name = "seowebsite"
-    main = "worker.js"
-    compatibility_date = "2025-11-20"
-    type = "javascript"
+name = "seowebsite"
+main = "worker.js"
+compatibility_date = "2025-11-20"
+type = "javascript"
 
-<<<<<<< HEAD
-# KV 绑定，用于存储静态文件
-[[kv_namespaces]] # 使用双括号表示数组元素
-binding = "ASSETS"
-id = "bdd9ab219a4b4634ae584547333df593" # *** 在这里填入您的实际 KV Namespace ID ***
-
-
-# 静态资产配置
 [build]
-command = "npm run build" # 可以定义一个构建命令，如果需要预处理静态文件
-upload.format = "modules" # 明确指定上传格式为模块
+command = "npm run build"
+upload.format = "modules"
 
 [site]
-bucket = "./public" # 指向静态文件所在的目录
-
-# Wrangler 会自动将`public`目录内容上传到名为`seowebsite-workers_sites_assets`的KV Namespace，并将其绑定到Worker的`env.ASSETS`。
-# 您不需要在这里再次手动定义[[kv_namespaces]]。
-# 如果您在仪表板中手动创建了KV Namespace，请确保其名称是Cloudflare Pages/Workers Sites的默认命名模式
-# 或者确保您的worker代码和wrangler.toml的KV绑定与仪表板中的绑定名称匹配。
-
-[vars]
-# AHREFS_API_KEY = "your_ahrefs_api_key"
-# SEMRUSH_API_KEY = "your_semrush_api_key"
-# MOZ_ACCESS_ID = "your_moz_access_id"
-# MOZ_SECRET_KEY = "your_moz_secret_key"
-=======
-    [build]
-    command = "npm run build"
-
-    [site]
-    bucket = "./public"
-    # KV Namespace id: Wrangler will automatically bind a KV Namespace named "ASSETS"
-    # to this Worker when deploying a Workers Site.
-    # The ID for this KV Namespace should be automatically managed by Cloudflare.
-    # If you need to manually specify it, you can add:
-    # id = "YOUR_ACTUAL_KV_NAMESPACE_ID"
-
-    [vars]
-    # AHREFS_API_KEY = "your_ahrefs_api_key"
-    # SEMRUSH_API_KEY = "your_semrush_api_key"
-    # MOZ_ACCESS_ID = "your_moz_access_id"
-    # MOZ_SECRET_KEY = "your_moz_secret_key"
->>>>>>> 33c4094e075b599e4ea6d62c50532fb7f6fa5c86
+bucket = "./public"
