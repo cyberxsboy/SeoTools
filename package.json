@@ -6,7 +6,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "npx wrangler dev",
     "deploy": "npx wrangler deploy",
-    "build": ""
+    "build": "npx wrangler kv:bulk put --binding=__STATIC_CONTENT --namespace-id=__seowebsite-workers_sites_assets --path=./public --prefix=public/"
   },
   "keywords": [],
   "author": "",
