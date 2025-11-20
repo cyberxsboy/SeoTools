@@ -1,7 +1,9 @@
 import { getAhrefsRankings } from './api/ahrefs';
 import { getSemrushRankings } from './api/semrush';
 import { getMozMetrics } from './api/moz';
-import { getAssetFromKV } from '@cloudflare/kv-asset-handler'; // 导入 getAssetFromKV
+import { getAssetFromKV } from '@cloudflare/kv-asset-handler';
+
+declare const __STATIC_CONTENT_MANIFEST: string; // 声明全局变量
 
 export default {
   async fetch(request, env, ctx) {
@@ -9,13 +11,12 @@ export default {
     console.log(`Incoming request for: ${url.pathname}`); 
 
     // 静态文件服务
-    // 当请求路径匹配静态文件时，使用getAssetFromKV来服务
     if (url.pathname === '/' || url.pathname.endsWith('.html') || url.pathname.endsWith('.css') || url.pathname.endsWith('.js')) {
       console.log('Attempting to serve static asset using getAssetFromKV.'); 
       try {
         return await getAssetFromKV(request, {
-          ASSET_NAMESPACE: env.ASSETS, // 传入KV Namespace绑定
-          ASSET_MANIFEST: __STATIC_CONTENT_MANIFEST, // Wrangler会自动注入此清单
+          ASSET_NAMESPACE: env.ASSETS, 
+          ASSET_MANIFEST: __STATIC_CONTENT_MANIFEST, 
         });
       } catch (e) {
         console.error(`Error serving static asset ${url.pathname}:`, e); 
