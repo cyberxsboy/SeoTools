@@ -12,9 +12,9 @@ export default {
     if (url.pathname === '/' || url.pathname.endsWith('.html') || url.pathname.endsWith('.css') || url.pathname.endsWith('.js')) {
       console.log('Attempting to serve static asset using getAssetFromKV.'); 
       try {
+        // 不再依赖__STATIC_CONTENT_MANIFEST，getAssetFromKV会直接从KV中查找
         return await getAssetFromKV(request, {
-          ASSET_NAMESPACE: env.ASSETS, 
-          ASSET_MANIFEST: __STATIC_CONTENT_MANIFEST, // 确保这里是直接引用全局变量，没有TypeScript语法
+          ASSET_NAMESPACE: env.ASSETS,
         });
       } catch (e) {
         console.error(`Error serving static asset ${url.pathname}:`, e); 

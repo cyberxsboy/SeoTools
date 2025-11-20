@@ -2,18 +2,13 @@ name = "seowebsite"
 main = "worker.js"
 compatibility_date = "2025-11-20"
 
-[site]
-bucket = "./public"
-# entry-point = "worker.js" # 当使用[site]时，entry-point通常指向静态资产的入口点，这里不设置
+# 移除[site]部分，显式定义KV绑定
+# bucket = "./public" # 此行将被替换为assets_for_kv_binding
 
-# Cloudflare Pages 部署时会自动生成这些，但在这里为了确保Worker能提供静态文件
-# 我们将Worker的入口点指向worker.js，并告诉Wrangler将根目录作为静态资产桶
-# 这将允许Worker直接提供index.html, app.js, style.css等文件
-# 警告: 这种方式会将所有根目录文件作为静态资产，包括服务器代码等，需要谨慎
-
-# 如果只想部署一个Worker，并通过该Worker提供静态内容，可以使用Workers Sites功能
-# 但Workers Sites通常需要一个build目录，这与我们希望将所有内容打包到单个Worker中有所不同
-# 这里我们尝试直接在Worker中处理静态文件，并通过bucket指向根目录
+# KV 绑定，用于存储静态文件
+[kv_namespaces]
+binding = "ASSETS"
+id = "YOUR_KV_NAMESPACE_ID" # *** 在这里填入您的实际 KV Namespace ID ***
 
 # 如果需要环境变量，可以在此处配置
 [vars]
