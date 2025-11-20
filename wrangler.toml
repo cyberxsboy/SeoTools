@@ -3,10 +3,7 @@ main = "worker.js"
 compatibility_date = "2025-11-20"
 
 # KV 绑定，用于存储静态文件
-[kv_namespaces]
-# 将kv_namespaces从对象改为数组
-# binding = "ASSETS"
-# id = "YOUR_KV_NAMESPACE_ID" # *** 在这里填入您的实际 KV Namespace ID ***
+# 移除冲突的[kv_namespaces]表定义
 
 [[kv_namespaces]] # 使用双括号表示数组元素
 binding = "ASSETS"
