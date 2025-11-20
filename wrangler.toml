@@ -3,7 +3,7 @@ main = "worker.js"
 compatibility_date = "2025-11-20"
 type = "javascript" # 明确指定Worker类型为JavaScript
 
-=======
+
 # KV 绑定，用于存储静态文件
 [[kv_namespaces]] # 使用双括号表示数组元素
 binding = "__seowebsite-workers_sites_assets"
@@ -23,7 +23,7 @@ bucket = "./public" # 指向静态文件所在的目录
 # SEMRUSH_API_KEY = "your_semrush_api_key"
 # MOZ_ACCESS_ID = "your_moz_access_id"
 # MOZ_SECRET_KEY = "your_moz_secret_key"
-=======
+
 name = "seowebsite"
 main = "worker.js"
 compatibility_date = "2025-11-20"
@@ -34,7 +34,7 @@ type = "javascript" # 明确指定Worker类型为JavaScript
 # [[kv_namespaces]] 
 # binding = "ASSETS"
 # id = "YOUR_KV_NAMESPACE_ID" 
-=======
+
 # KV 绑定，用于存储静态文件
 [[kv_namespaces]] # 使用双括号表示数组元素
 binding = "__seowebsite-workers_sites_assets"
