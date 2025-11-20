@@ -1,7 +1,13 @@
-import { getAssetFromKV } from '@cloudflare/kv-asset-handler';
 import { getAhrefsRankings } from './api/ahrefs';
 import { getSemrushRankings } from './api/semrush';
 import { getMozMetrics } from './api/moz';
+
+const assetManifest = {
+  "/": "index.html",
+  "/index.html": "index.html",
+  "/app.js": "app.js",
+  "/style.css": "style.css"
+};
 
 export default {
   async fetch(request, env, ctx) {
@@ -20,24 +26,22 @@ export default {
     const url = new URL(request.url);
     console.log(`Incoming request for: ${url.pathname}`);
 
-    // Try to serve static assets first using kv-asset-handler
+    // Try to serve static assets directly from KV
     if (!url.pathname.startsWith('/api/')) {
-      try {
-        return await getAssetFromKV(
-          {
-            request,
-            waitUntil(promise) {
-              return ctx.waitUntil(promise);
-            },
-          },
-          {
-            ASSET_NAMESPACE: env.__STATIC_CONTENT,
-            ASSET_MANIFEST: globalThis.__STATIC_CONTENT_MANIFEST,
+      const assetPath = assetManifest[url.pathname] || assetManifest['/'];
+      if (assetPath) {
+        const content = await env.__STATIC_CONTENT.get(`public/${assetPath}`);
+        if (content) {
+          const headers = new Headers();
+          if (assetPath.endsWith('.html')) {
+            headers.set('Content-Type', 'text/html');
+          } else if (assetPath.endsWith('.js')) {
+            headers.set('Content-Type', 'application/javascript');
+          } else if (assetPath.endsWith('.css')) {
+            headers.set('Content-Type', 'text/css');
           }
-        );
-      } catch (e) {
-        console.error('Error serving static asset with kv-asset-handler:', e);
-        // Fall through to API handling or 404 if asset not found
+          return new Response(content, { headers });
+        }
       }
     }
 
