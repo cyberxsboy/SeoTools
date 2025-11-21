@@ -1,61 +1,13 @@
+import { getAssetFromKV } from '@cloudflare/kv-asset-handler';
 import { getAhrefsRankings } from './api/ahrefs';
 import { getSemrushRankings } from './api/semrush';
 import { getMozMetrics } from './api/moz';
 
-const assetManifest = {
-  "/": "index.html",
-  "/index.html": "index.html",
-  "/app.js": "app.js",
-  "/style.css": "style.css"
-};
-
 export default {
   async fetch(request, env, ctx) {
-    console.log('--- Incoming Request Debug ---');
-    console.log('Request method:', request.method);
-    console.log('Request URL:', request.url);
-    try {
-      const parsedUrl = new URL(request.url);
-      console.log('Parsed URL pathname:', parsedUrl.pathname);
-      console.log('Parsed URL origin:', parsedUrl.origin);
-    } catch (e) {
-      console.error('Error parsing request URL:', e);
-    }
-    console.log('--- Incoming Request Debug --- End');
-
     const url = new URL(request.url);
-    console.log(`Incoming request for: ${url.pathname}`);
-
-    // Try to serve static assets directly from KV
-    if (!url.pathname.startsWith('/api/')) {
-      let assetPath = assetManifest[url.pathname];
-      if (!assetPath && url.pathname === '/') {
-        assetPath = assetManifest['/'];
-      }
-      console.log(`Resolved assetPath: ${assetPath}`);
-
-      if (assetPath) {
-        const kvKey = `public/${assetPath}`;
-        console.log(`Attempting to get KV key: ${kvKey}`);
-        const content = await env.__STATIC_CONTENT.get(kvKey);
-        console.log(`Content for ${kvKey} is null: ${content === null}`);
-
-        if (content) {
-          const headers = new Headers();
-          if (assetPath.endsWith('.html')) {
-            headers.set('Content-Type', 'text/html');
-          } else if (assetPath.endsWith('.js')) {
-            headers.set('Content-Type', 'application/javascript');
-          } else if (assetPath.endsWith('.css')) {
-            headers.set('Content-Type', 'text/css');
-          }
-          return new Response(content, { headers });
-        }
-      }
-    }
 
     if (url.pathname === '/fetch-website-content') {
-      console.log('Handling /fetch-website-content API call.');
       if (request.method !== 'POST') {
         return new Response('Method Not Allowed', { status: 405 });
       }
@@ -78,7 +30,6 @@ export default {
     }
 
     if (url.pathname === '/track-ranking') {
-      console.log('Handling /track-ranking API call.');
       if (request.method !== 'POST') {
         return new Response('Method Not Allowed', { status: 405 });
       }
@@ -110,7 +61,6 @@ export default {
     }
 
     if (url.pathname === '/moz-metrics') {
-      console.log('Handling /moz-metrics API call.');
       if (request.method !== 'POST') {
         return new Response('Method Not Allowed', { status: 405 });
       }
@@ -129,7 +79,19 @@ export default {
       }
     }
 
-    console.log(`Path not found: ${url.pathname}`);
-    return new Response('Not Found', { status: 404 });
+    try {
+      return await getAssetFromKV(
+        {
+          request,
+          waitUntil: ctx.waitUntil.bind(ctx),
+        },
+        {
+          ASSET_NAMESPACE: env.__STATIC_CONTENT,
+          ASSET_MANIFEST: env.__STATIC_CONTENT_MANIFEST,
+        }
+      );
+    } catch (e) {
+      return new Response('Not Found', { status: 404 });
+    }
   },
 };

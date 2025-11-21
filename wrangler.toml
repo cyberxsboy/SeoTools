@@ -2,9 +2,5 @@ name = "seowebsite"
 main = "worker.js"
 compatibility_date = "2025-11-20"
 
-[build]
-command = "npm run build"
-
-[[kv_namespaces]]
-binding = "__STATIC_CONTENT"
-id = "1a8a89365d0c4f7b876e4ab332fd51c1"
+[site]
+bucket = "./public"

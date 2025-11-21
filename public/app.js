@@ -147,7 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
         analysisOutput.textContent = '正在分析，请稍候...';
 
         try {
-            const proxyUrl = `http://localhost:3000/fetch-website-content`;
+            const proxyUrl = `/fetch-website-content`;
             
             let targetUrl = `https://${selectedDomain}`;
             let response = await fetch(proxyUrl, {
@@ -269,7 +269,7 @@ document.addEventListener('DOMContentLoaded', () => {
             analysisText += `\n--- 权威度指标 (Moz) ---\n`;
             try {
                 const settings = JSON.parse(localStorage.getItem('seoSettings')) || {};
-                const mozProxyUrl = `http://localhost:3000/moz-metrics`;
+                const mozProxyUrl = `/moz-metrics`;
                 const mozResponse = await fetch(mozProxyUrl, {
                     method: 'POST',
                     headers: {
@@ -423,7 +423,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             const settings = JSON.parse(localStorage.getItem('seoSettings')) || {};
-            const proxyUrl = `http://localhost:3000/track-ranking`;
+            const proxyUrl = `/track-ranking`;
             const response = await fetch(proxyUrl, {
                 method: 'POST',
                 headers: {
